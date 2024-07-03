@@ -1,7 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit";
-
+import counterReducer from "./features/counterSlice";
+import todoSlice from "./features/todo/todoSlice";
+import { baseApi } from "./api/api";
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    [baseApi.reducerPath]: baseApi.reducer,
+    counter: counterReducer,
+    todos: todoSlice,
+  },
+  //   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(Logger),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(baseApi.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself

@@ -1,11 +1,7 @@
-import React, { createElement } from "react";
-import {
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
+import { UploadOutlined, UserOutlined } from "@ant-design/icons";
 import { Layout, Menu, theme } from "antd";
-import { Outlet } from "react-router-dom";
+import React, { createElement } from "react";
+import { Link, Outlet } from "react-router-dom";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -28,18 +24,13 @@ const items = [
   },
   {
     key: "2",
-    icon: createElement(VideoCameraOutlined),
-    label: "Categories",
+    icon: createElement(UploadOutlined),
+    label: <Link to="/brand">Brand</Link>,
   },
   {
     key: "3",
-    icon: createElement(UploadOutlined),
-    label: "Brand",
-  },
-  {
-    key: "4",
     icon: createElement(UserOutlined),
-    label: "Profile",
+    label: <Link to="/category">Category</Link>,
   },
 ];
 
