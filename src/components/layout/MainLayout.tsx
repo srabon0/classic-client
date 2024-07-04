@@ -20,7 +20,7 @@ const items = [
   {
     key: "1",
     icon: createElement(UserOutlined),
-    label: "Products",
+    label: <Link to="/product">Product</Link>,
   },
   {
     key: "2",

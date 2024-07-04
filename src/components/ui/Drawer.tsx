@@ -1,17 +1,25 @@
-import { Button, Drawer, Space } from "antd";
+import { Drawer, Space } from "antd";
 import React from "react";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  title?: string;
+  footer?: React.ReactNode;
 };
 
-const CDrawer: React.FC<Props> = ({ isOpen, onClose, children }) => {
+const CDrawer: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  children,
+  title = "",
+  footer = null,
+}) => {
   return (
     <>
       <Drawer
-        title="Create a new account"
+        title={title}
         width={720}
         onClose={onClose}
         open={isOpen}
@@ -20,14 +28,7 @@ const CDrawer: React.FC<Props> = ({ isOpen, onClose, children }) => {
             paddingBottom: 80,
           },
         }}
-        extra={
-          <Space>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={onClose} type="primary">
-              Submit
-            </Button>
-          </Space>
-        }
+        footer={<>{footer ? <Space>{footer}</Space> : <Space>{null}</Space>}</>}
       >
         {children}
       </Drawer>

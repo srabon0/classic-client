@@ -3,6 +3,7 @@ import App from "../App";
 import Brand from "../pages/Brand";
 import Category from "../pages/Categories";
 import Login from "../pages/Login";
+import Product from "../pages/Products";
 import Register from "../pages/Register";
 
 const router = createBrowserRouter([
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: "brand",
         element: <Brand />,
+      },
+      {
+        path: "product",
+        element: <Product />,
       },
     ],
   },

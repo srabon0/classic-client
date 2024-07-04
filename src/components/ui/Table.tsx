@@ -5,8 +5,13 @@ import { useState } from "react";
 type TableProps<T extends object> = {
   columns: TableColumnsType<T>;
   data: T[];
+  pagination?: boolean;
 };
-const TableComponent = <T extends object>({ columns, data }: TableProps<T>) => {
+const TableComponent = <T extends object>({
+  columns,
+  data,
+  pagination = true,
+}: TableProps<T>) => {
   // State for current page and page size
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -22,12 +27,16 @@ const TableComponent = <T extends object>({ columns, data }: TableProps<T>) => {
     <Table
       columns={columns}
       dataSource={data}
-      pagination={{
-        current,
-        pageSize,
-      }}
+      pagination={
+        pagination
+          ? {
+              current,
+              pageSize,
+            }
+          : false
+      }
       onChange={handleTableChange}
-      scroll={{ y: 240 }}
+      scroll={{ y: "55vh" }}
     />
   );
 };
