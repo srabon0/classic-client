@@ -1,6 +1,7 @@
 import { Button, Pagination } from "antd";
 import { useState } from "react";
-import { useGetProductsQuery } from "../../redux/api/api.products";
+
+import { useGetProductsQuery } from "../../redux/features/product/productApi";
 import Form from "./Form";
 import ProductTable from "./Table";
 

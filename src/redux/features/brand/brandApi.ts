@@ -1,17 +1,13 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseApi } from "../../api/baseApi";
 
-export const brandsApi = createApi({
-  reducerPath: "brandsApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/",
-  }),
+const brandAPi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBrands: builder.query({
       query: () => ({
         url: "brands",
         method: "GET",
       }),
-      providesTags: ["Brand"],
+      //   providesTags: ["Brand"],
     }),
     addBrand: builder.mutation({
       query: (data) => ({
@@ -19,14 +15,14 @@ export const brandsApi = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Brand"],
+      //   invalidatesTags: ["Brand"],
     }),
     deleteBrand: builder.mutation({
       query: (id) => ({
         url: `brands/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Brand"],
+      //   invalidatesTags: ["Brand"],
     }),
     updateBrand: builder.mutation({
       query: (data) => ({
@@ -34,7 +30,7 @@ export const brandsApi = createApi({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["Brand"],
+      //   invalidatesTags: ["Brand"],
     }),
   }),
 });
@@ -44,4 +40,4 @@ export const {
   useAddBrandMutation,
   useDeleteBrandMutation,
   useUpdateBrandMutation,
-} = brandsApi;
+} = brandAPi;

@@ -1,24 +1,49 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { brandsApi } from "./api/api.brands";
-import { categoriesApi } from "./api/api.categories";
-import { productsApi } from "./api/api.products";
+import { baseApi } from "./api/baseApi";
+import authReducer from "./features/auth/authSlice";
+
+import {
+  FLUSH,
+  PAUSE,
+  PERSIST,
+  persistReducer,
+  persistStore,
+  PURGE,
+  REGISTER,
+  REHYDRATE,
+} from "redux-persist";
+
+import storage from "redux-persist/lib/storage";
+import brandReducer from "./features/brand/brandSlice";
+import categoryReducer from "./features/categories/categorySlice";
+import productReducer from "./features/product/productSlice";
+
+const persistConfig = {
+  key: "auth",
+  storage,
+};
+
+const persistedReducer = persistReducer(persistConfig, authReducer);
 
 export const store = configureStore({
   reducer: {
-    [productsApi.reducerPath]: productsApi.reducer,
-    [categoriesApi.reducerPath]: categoriesApi.reducer,
-    [brandsApi.reducerPath]: brandsApi.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
+    auth: persistedReducer,
+    brand: brandReducer,
+    categories: categoryReducer,
+    products: productReducer,
   },
-  //   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(Logger),
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(
-      productsApi.middleware,
-      categoriesApi.middleware,
-      brandsApi.middleware
-    ),
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(baseApi.middleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
 // Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
 export type AppDispatch = typeof store.dispatch;
+
+export const persistor = persistStore(store);

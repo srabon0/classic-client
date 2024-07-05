@@ -1,7 +1,7 @@
 import { Button } from "antd";
 import { useState } from "react";
 import CTable from "../../components/ui/Table";
-import { useGetCategoriesQuery } from "../../redux/api/api.categories";
+import { useGetCategoriesQuery } from "../../redux/features/categories/categoryApi";
 import { TCategory } from "../../types/categories.type";
 import Form from "./Form";
 

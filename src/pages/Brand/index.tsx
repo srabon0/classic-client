@@ -1,9 +1,9 @@
 import { Button } from "antd";
 import { useState } from "react";
 import CTable from "../../components/ui/Table";
-import { useGetBrandsQuery } from "../../redux/api/api.brands";
-import Form from "./Form";
+import { useGetBrandsQuery } from "../../redux/features/brand/brandApi";
 import { TBrand } from "../../types/brand.type";
+import Form from "./Form";
 
 const Brand = () => {
   const [visible, setVisible] = useState<boolean>(false);

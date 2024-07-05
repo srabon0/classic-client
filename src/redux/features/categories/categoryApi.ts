@@ -1,17 +1,13 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseApi } from "../../api/baseApi";
 
-export const categoriesApi = createApi({
-  reducerPath: "categoriesApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:8000/api/v1/",
-  }),
+const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCategories: builder.query({
       query: () => ({
         url: "categories",
         method: "GET",
       }),
-      providesTags: ["Category"],
+      //   providesTags: ["Category"],
     }),
     addCategory: builder.mutation({
       query: (data) => ({
@@ -19,14 +15,14 @@ export const categoriesApi = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Category"],
+      //   invalidatesTags: ["Category"],
     }),
     deleteCategory: builder.mutation({
       query: (id) => ({
         url: `categories/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Category"],
+      //   invalidatesTags: ["Category"],
     }),
     updateCategory: builder.mutation({
       query: (data) => ({
@@ -34,7 +30,7 @@ export const categoriesApi = createApi({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["Category"],
+      //   invalidatesTags: ["Category"],
     }),
   }),
 });
@@ -44,4 +40,4 @@ export const {
   useAddCategoryMutation,
   useDeleteCategoryMutation,
   useUpdateCategoryMutation,
-} = categoriesApi;
+} = categoryApi;

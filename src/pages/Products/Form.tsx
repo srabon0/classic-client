@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import CDrawer from "../../components/ui/Drawer";
 
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Image, Input, Select, Space, Upload } from "antd";
+import { Button, Image, Input, Select, Upload } from "antd";
 import { Controller, useForm } from "react-hook-form";
-import { useGetBrandsQuery } from "../../redux/api/api.brands";
-import { useGetCategoriesQuery } from "../../redux/api/api.categories";
+import { useAppSelector } from "../../redux/hook";
 
 import type { GetProp, UploadFile, UploadProps } from "antd";
 
@@ -51,12 +50,12 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     formState: { errors },
     control,
   } = useForm();
-  const onSubmit = (data) => {
+  const onSubmit = (data: object) => {
     console.log(data);
     console.log("img fiels", fileList);
   };
 
-  const handleChangeInput = (name, value) => {
+  const handleChangeInput = (name: string, value: string) => {
     setValue(name, value);
     if (value.trim().length > 0) clearErrors(name);
   };
@@ -69,23 +68,15 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     console.log(`selected ${value}`);
   };
 
-  const {
-    data: categoryList,
-    error: isCatError,
-    isLoading: isCatLoading,
-  } = useGetCategoriesQuery(undefined);
-  const {
-    data: brandList,
-    error: isBrandError,
-    isLoading: isBrandLoading,
-  } = useGetBrandsQuery(undefined);
+  const categoryList = useAppSelector((state) => state.categories.categories);
+  const brandList = useAppSelector((state) => state.brand.brands);
 
   const options = {
-    category: categoryList?.data.map((item) => ({
+    category: categoryList?.map((item) => ({
       value: item._id,
       label: item.name,
     })),
-    brand: brandList?.data.map((item) => ({
+    brand: brandList?.map((item) => ({
       value: item._id,
       label: item.name,
     })),

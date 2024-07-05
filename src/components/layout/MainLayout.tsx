@@ -1,38 +1,9 @@
-import { UploadOutlined, UserOutlined } from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
-import React, { createElement } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Layout, theme } from "antd";
+import React from "react";
+import { Outlet } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
-const { Header, Content, Footer, Sider } = Layout;
-
-// const items = [
-//   UserOutlined,
-//   VideoCameraOutlined,
-//   UploadOutlined,
-//   UserOutlined,
-// ].map((icon, index) => ({
-//   key: String(index + 1),
-//   icon: createElement(icon),
-//   label: `nav ${index + 1}`,
-// }));
-
-const items = [
-  {
-    key: "1",
-    icon: createElement(UserOutlined),
-    label: <Link to="/product">Product</Link>,
-  },
-  {
-    key: "2",
-    icon: createElement(UploadOutlined),
-    label: <Link to="/brand">Brand</Link>,
-  },
-  {
-    key: "3",
-    icon: createElement(UserOutlined),
-    label: <Link to="/category">Category</Link>,
-  },
-];
+const { Header, Content, Footer } = Layout;
 
 const MainLayout: React.FC = () => {
   const {
@@ -45,37 +16,7 @@ const MainLayout: React.FC = () => {
         minHeight: "100vh",
       }}
     >
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        onBreakpoint={(broken) => {
-          console.log(broken);
-        }}
-        onCollapse={(collapsed, type) => {
-          console.log(collapsed, type);
-        }}
-      >
-        <div>
-          <h1
-            style={{
-              color: "white",
-              textAlign: "center",
-              padding: "20px",
-              fontSize: "1rem",
-
-              textTransform: "uppercase",
-            }}
-          >
-            Classic Group
-          </h1>
-        </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={["4"]}
-          items={items}
-        />
-      </Sider>
+      <Sidebar />
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }} />
         <Content style={{ margin: "24px 16px 0" }}>

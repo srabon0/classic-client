@@ -4,6 +4,7 @@ import TableComponent from "../../components/ui/Table";
 import { TProduct } from "../../types/product.type";
 type Props = {
   products: TProduct[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   meta: any;
 };
 
