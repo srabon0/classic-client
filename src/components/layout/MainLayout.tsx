@@ -1,6 +1,8 @@
-import { Layout, theme } from "antd";
+import { Button, Layout, theme } from "antd";
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { logout } from "../../redux/features/auth/authSlice";
+import { useAppDispatch } from "../../redux/hook";
 import Sidebar from "./Sidebar";
 
 const { Header, Content, Footer } = Layout;
@@ -10,6 +12,12 @@ const MainLayout: React.FC = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
   return (
     <Layout
       style={{
@@ -18,7 +26,10 @@ const MainLayout: React.FC = () => {
     >
       <Sidebar />
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Header>
+          <Button onClick={handleLogout}>Logout</Button>{" "}
+        </Header>
+
         <Content style={{ margin: "24px 16px 0" }}>
           <div
             style={{
