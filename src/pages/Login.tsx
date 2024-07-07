@@ -2,8 +2,9 @@ import { Button, Row } from "antd";
 import { FieldValues } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import PHForm from "../components/form/PHForm";
-import PHInput from "../components/form/PHInput";
+
+import Form from "../components/form/Form";
+import InputField from "../components/form/InputField";
 import { useLoginMutation } from "../redux/features/auth/authApi";
 import { TUser, setUser } from "../redux/features/auth/authSlice";
 import { useAppDispatch } from "../redux/hook";
@@ -41,11 +42,11 @@ const Login = () => {
 
   return (
     <Row justify="center" align="middle" style={{ height: "100vh" }}>
-      <PHForm onSubmit={onSubmit} defaultValues={defaultValues}>
-        <PHInput type="email" name="email" label="email:" />
-        <PHInput type="text" name="password" label="Password" />
+      <Form onSubmit={onSubmit} defaultValues={defaultValues}>
+        <InputField type="email" name="email" label="Email:" />
+        <InputField type="text" name="password" label="Password" />
         <Button htmlType="submit">Login</Button>
-      </PHForm>
+      </Form>
     </Row>
   );
 };

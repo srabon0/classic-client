@@ -7,7 +7,7 @@ type TInputProps = {
   label?: string;
 };
 
-const PHInput = ({ type, name, label }: TInputProps) => {
+const InputField = ({ type, name, label }: TInputProps) => {
   return (
     <div style={{ marginBottom: "20px" }}>
       {label ? label : null}
@@ -19,4 +19,4 @@ const PHInput = ({ type, name, label }: TInputProps) => {
   );
 };
 
-export default PHInput;
+export default InputField;
