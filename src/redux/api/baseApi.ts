@@ -9,9 +9,15 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import { logout, setUser } from "../features/auth/authSlice";
 import { RootState } from "../store";
+import { tagTypesList } from "../tag-types";
+
+const url =
+  import.meta.env.NODE_ENV === "development"
+    ? import.meta.env.VITE_LOCAL_BACKEND_URL
+    : import.meta.env.VITE_PROD_BACKEND_URL;
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:8000/api/v1",
+  baseUrl: url,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
@@ -35,7 +41,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
     //* Send Refresh
     console.log("Sending refresh token");
 
-    const res = await fetch("http://localhost:8000/api/v1/auth/refresh-token", {
+    const res = await fetch(url + "auth/refresh-token", {
       method: "POST",
       credentials: "include",
     });
@@ -65,4 +71,5 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: baseQueryWithRefreshToken,
   endpoints: () => ({}),
+  tagTypes: tagTypesList,
 });

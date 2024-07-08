@@ -9,7 +9,7 @@ interface ISubcategories {
 interface ICategories {
   name: string;
   _id: string;
-  subcategories: ISubcategories[];
+  subCategories?: ISubcategories[];
 }
 
 type TCategoryState = {

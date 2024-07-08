@@ -1,54 +1,86 @@
 import { Button } from "antd";
 import { useState } from "react";
-import CTable from "../../components/ui/Table";
+import ClassicTable from "../../components/ui/Table";
 import { useGetBrandsQuery } from "../../redux/features/brand/brandApi";
-import { TBrand } from "../../types/brand.type";
+import { TCategory } from "../../types/categories.type";
 import Form from "./Form";
 
-const Brand = () => {
+const columns = [
+  {
+    title: "Sl No.",
+    dataIndex: "id",
+    key: "id",
+  },
+  {
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
+  },
+  {
+    title: "Description",
+    dataIndex: "description",
+    key: "description",
+  },
+  {
+    title: "Action",
+    dataIndex: "action",
+    key: "action",
+  },
+];
+
+const Category = () => {
   const [visible, setVisible] = useState<boolean>(false);
+  const query: Record<string, any> = {};
+  const [page, setPage] = useState<number>(1);
+  const [size, setSize] = useState<number>(20);
+  // const [sortBy, setSortBy] = useState<string>("");
+  // const [sortOrder, setSortOrder] = useState<string>("");
+
+  query["limit"] = size;
+  query["page"] = page;
+  // query["sortBy"] = sortBy;
+  // query["sortOrder"] = sortOrder;
+
+  const onPaginationChange = (page: number, pageSize: number) => {
+    console.log("Page:", page, "PageSize:", pageSize);
+    setPage(page);
+    setSize(pageSize);
+  };
+  // const onTableChange = (pagination: any, filter: any, sorter: any) => {
+  //   const { order, field } = sorter;
+  //   // console.log(order, field);
+  //   setSortBy(field as string);
+  //   setSortOrder(order === "ascend" ? "asc" : "desc");
+  // };
+
   const showDrawer = () => {
     setVisible(true);
   };
   const onClose = () => {
     setVisible(false);
   };
-
-  const { data, error, isLoading } = useGetBrandsQuery(undefined);
+  const { data, error, isLoading } = useGetBrandsQuery({
+    ...query,
+  });
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error</div>;
 
-  const { data: brands } = data;
+  const brands = data?.data?.data;
+  const meta = data?.data?.meta;
+
   return (
     <div>
       <Button type="primary" onClick={showDrawer}>
-        Add Brand
+        Add Category
       </Button>
-      <CTable
-        columns={[
-          {
-            title: "Sl No.",
-            dataIndex: "id",
-            key: "id",
-          },
-          {
-            title: "Name",
-            dataIndex: "name",
-            key: "name",
-          },
-          {
-            title: "Description",
-            dataIndex: "description",
-            key: "description",
-          },
-          {
-            title: "Action",
-            dataIndex: "action",
-            key: "action",
-          },
-        ]}
-        data={brands?.map((item: TBrand, index: number) => ({
-          id: index + 1,
+
+      <ClassicTable
+        loading={isLoading}
+        columns={columns}
+        dataSource={brands?.map((item: TCategory, index: number) => ({
+          id: Number((meta?.page - 1) * meta?.limit + index + 1)
+            .toString()
+            .padStart(2, "0"),
           name: item.name,
           description: item.description,
           action: (
@@ -65,10 +97,17 @@ const Brand = () => {
             </div>
           ),
         }))}
+        pageSize={size}
+        totalPages={meta?.totalCounts}
+        showSizeChanger={true}
+        onPaginationChange={onPaginationChange}
+        // onTableChange={onTableChange}
+        showPagination={true}
       />
+
       <Form isOpen={visible} handleClose={onClose} />
     </div>
   );
 };
 
-export default Brand;
+export default Category;

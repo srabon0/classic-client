@@ -1,44 +1,47 @@
-import type { TableColumnsType } from "antd";
 import { Table } from "antd";
-import { useState } from "react";
 
-type TableProps<T extends object> = {
-  columns: TableColumnsType<T>;
-  data: T[];
-  pagination?: boolean;
+type ClassicTableProps = {
+  loading?: boolean;
+  columns: any;
+  dataSource: any;
+  pageSize?: number;
+  totalPages?: number;
+  showSizeChanger?: boolean;
+  onPaginationChange?: (page: number, pageSize: number) => void;
+  onTableChange?: (pagination: any, filter: any, sorter: any) => void;
+  showPagination?: boolean;
 };
-const TableComponent = <T extends object>({
-  columns,
-  data,
-  pagination = true,
-}: TableProps<T>) => {
-  // State for current page and page size
-  const [current, setCurrent] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
 
-  // Handle pagination change
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleTableChange = (pagination: any) => {
-    setCurrent(pagination.current);
-    setPageSize(pagination.pageSize);
-  };
+const ClassicTable = ({
+  loading = false,
+  columns,
+  dataSource,
+  pageSize,
+  totalPages,
+  showSizeChanger = true,
+  onPaginationChange,
+  onTableChange,
+  showPagination = true,
+}: ClassicTableProps) => {
+  const paginationConfig = showPagination
+    ? {
+        pageSize: pageSize,
+        total: totalPages,
+        pageSizeOptions: [10, 20, 50, 100],
+        showSizeChanger: showSizeChanger,
+        onChange: onPaginationChange,
+      }
+    : false;
 
   return (
     <Table
+      loading={loading}
       columns={columns}
-      dataSource={data}
-      pagination={
-        pagination
-          ? {
-              current,
-              pageSize,
-            }
-          : false
-      }
-      onChange={handleTableChange}
-      scroll={{ y: "55vh" }}
+      dataSource={dataSource}
+      pagination={paginationConfig}
+      onChange={onTableChange}
     />
   );
 };
 
-export default TableComponent;
+export default ClassicTable;

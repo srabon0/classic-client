@@ -1,28 +1,33 @@
 import { baseApi } from "../../api/baseApi";
-
+import { tagTypes } from "../../tag-types";
+const BRAND_URL = "brands";
 const brandAPi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getBrands: builder.query({
-      query: () => ({
-        url: "brands",
-        method: "GET",
-      }),
-      //   providesTags: ["Brand"],
+      query: (arg: Record<string, any>) => {
+        return {
+          url: BRAND_URL,
+          method: "GET",
+          params: arg,
+        };
+      },
+      providesTags: [tagTypes.brands],
     }),
+
     addBrand: builder.mutation({
       query: (data) => ({
         url: "brands",
         method: "POST",
         body: data,
       }),
-      //   invalidatesTags: ["Brand"],
+      invalidatesTags: [tagTypes.brands],
     }),
     deleteBrand: builder.mutation({
       query: (id) => ({
         url: `brands/${id}`,
         method: "DELETE",
       }),
-      //   invalidatesTags: ["Brand"],
+      invalidatesTags: [tagTypes.brands],
     }),
     updateBrand: builder.mutation({
       query: (data) => ({
@@ -30,7 +35,7 @@ const brandAPi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      //   invalidatesTags: ["Brand"],
+      invalidatesTags: [tagTypes.brands],
     }),
   }),
 });

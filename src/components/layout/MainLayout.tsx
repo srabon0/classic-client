@@ -2,6 +2,10 @@ import { Button, Layout, theme } from "antd";
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { logout } from "../../redux/features/auth/authSlice";
+import { useGetBrandsQuery } from "../../redux/features/brand/brandApi";
+import { setBrands } from "../../redux/features/brand/brandSlice";
+import { useGetCategoriesQuery } from "../../redux/features/categories/categoryApi";
+import { setCategories } from "../../redux/features/categories/categorySlice";
 import { useAppDispatch } from "../../redux/hook";
 import Sidebar from "./Sidebar";
 
@@ -17,6 +21,25 @@ const MainLayout: React.FC = () => {
   const handleLogout = () => {
     dispatch(logout());
   };
+
+  const { data: CategoryData } = useGetCategoriesQuery({
+    limit: 100,
+    page: 1,
+  });
+  const { data: BrandData } = useGetBrandsQuery({
+    limit: 100,
+    page: 1,
+  });
+
+  if (CategoryData) {
+    console.log("CategoryData", CategoryData);
+    dispatch(setCategories(CategoryData?.data?.data as any));
+  }
+
+  if (BrandData) {
+    console.log("BrandData", BrandData);
+    dispatch(setBrands(BrandData?.data?.data as any));
+  }
 
   return (
     <Layout

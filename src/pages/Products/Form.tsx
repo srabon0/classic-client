@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CDrawer from "../../components/ui/Drawer";
 
 import { PlusOutlined } from "@ant-design/icons";
@@ -49,6 +49,7 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     clearErrors,
     formState: { errors },
     control,
+    watch,
   } = useForm();
   const onSubmit = (data: object) => {
     console.log(data);
@@ -75,6 +76,10 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     category: categoryList?.map((item) => ({
       value: item._id,
       label: item.name,
+      subCategories: item?.subCategories?.map((sub) => ({
+        value: sub.name,
+        label: sub.name,
+      })),
     })),
     brand: brandList?.map((item) => ({
       value: item._id,
@@ -101,6 +106,12 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     </button>
   );
 
+  const selectedCategory = watch("category");
+
+  useEffect(() => {
+    setValue("subCategory", null);
+  }, [selectedCategory, setValue]);
+
   return (
     <div>
       <CDrawer title="Add Product" isOpen={isOpen} onClose={handleClose}>
@@ -113,15 +124,13 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
             <Input
               size="large"
               placeholder="Product name"
-              {...register("productName", {
+              {...register("title", {
                 required: "Product name is required",
               })}
-              onChange={(e) => handleChangeInput("productName", e.target.value)}
+              onChange={(e) => handleChangeInput("title", e.target.value)}
             />
-            {errors.productName && (
-              <p style={{ color: "red" }}>
-                {errors.productName.message as string}
-              </p>
+            {errors.title && (
+              <p style={{ color: "red" }}>{errors.title.message as string}</p>
             )}
           </div>
           <div
@@ -200,16 +209,16 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
               type="number"
               min={0}
               placeholder="Carton capacity"
-              {...register("cartonCapacity", {
+              {...register("cartoncapacity", {
                 required: "Carton capacity is required",
               })}
               onChange={(e) =>
-                handleChangeInput("cartonCapacity", e.target.value)
+                handleChangeInput("cartoncapacity", e.target.value)
               }
             />
-            {errors.cartonCapacity && (
+            {errors.cartoncapacity && (
               <p style={{ color: "red" }}>
-                {errors.cartonCapacity.message as string}
+                {errors.cartoncapacity.message as string}
               </p>
             )}
           </div>
@@ -224,6 +233,7 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
               rules={{ required: "Category is required" }}
               render={({ field }) => (
                 <Select
+                  allowClear
                   size="large"
                   {...field}
                   placeholder="Select Category"
@@ -243,6 +253,36 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
               </p>
             )}
           </div>
+
+          {selectedCategory && (
+            <div style={{ marginBottom: "10px" }}>
+              <Controller
+                name="subCategory"
+                control={control}
+                rules={{ required: "Sub Category is required" }}
+                render={({ field }) => (
+                  <Select
+                    size="large"
+                    {...field}
+                    placeholder="Select Sub Category"
+                    style={commonStyles.select}
+                    options={
+                      options.category.find(
+                        (item) => item.value === selectedCategory
+                      )?.subCategories
+                    }
+                    onChange={(value) => field.onChange(value)}
+                  />
+                )}
+              />
+              {errors.subCategory && (
+                <p style={{ color: "red", marginBottom: "10px" }}>
+                  {errors.subCategory.message as string}
+                </p>
+              )}
+            </div>
+          )}
+
           <div
             style={{
               marginBottom: "10px",

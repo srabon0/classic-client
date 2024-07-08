@@ -1,13 +1,19 @@
 import { baseApi } from "../../api/baseApi";
+import { tagTypes } from "../../tag-types";
+
+const PRODUCT_URL = "products";
 
 const productApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getProducts: builder.query({
-      query: () => ({
-        url: "products",
-        method: "GET",
-      }),
-      //   providesTags: ["Product"],
+      query: (arg: Record<string, any>) => {
+        return {
+          url: PRODUCT_URL,
+          method: "GET",
+          params: arg,
+        };
+      },
+      providesTags: [tagTypes.products],
     }),
     addProduct: builder.mutation({
       query: (data) => ({
@@ -15,14 +21,14 @@ const productApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      //   invalidatesTags: ["Product"],
+      invalidatesTags: [tagTypes.products],
     }),
     deleteProduct: builder.mutation({
       query: (id) => ({
         url: `products/${id}`,
         method: "DELETE",
       }),
-      //   invalidatesTags: ["Product"],
+      invalidatesTags: [tagTypes.products],
     }),
     updateProduct: builder.mutation({
       query: (data) => ({
@@ -30,7 +36,7 @@ const productApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      //   invalidatesTags: ["Product"],
+      invalidatesTags: [tagTypes.products],
     }),
   }),
 });

@@ -10,4 +10,4 @@ export const tagTypesList = [
   tagTypes.brands,
   tagTypes.categories,
   tagTypes.products,
-];
+]; 
