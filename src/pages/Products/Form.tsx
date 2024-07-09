@@ -7,6 +7,8 @@ import { Controller, useForm } from "react-hook-form";
 import { useAppSelector } from "../../redux/hook";
 
 import type { GetProp, UploadFile, UploadProps } from "antd";
+import { useCurrentToken } from "../../redux/features/auth/authSlice";
+import { useAddProductMutation } from "../../redux/features/product/productApi";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -39,6 +41,7 @@ type Props = {
 };
 
 const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
+  const token = useAppSelector(useCurrentToken);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -51,9 +54,44 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     control,
     watch,
   } = useForm();
-  const onSubmit = (data: object) => {
-    console.log(data);
-    console.log("img fiels", fileList);
+
+  const uploadProductImage = async (files: FormData) => {
+    const base =
+      import.meta.env.NODE_ENV === "development"
+        ? import.meta.env.VITE_LOCAL_BACKEND_URL
+        : import.meta.env.VITE_PROD_BACKEND_URL;
+
+    const uploadUrl = base + "files/upload-image";
+
+    // Get the token from the Redux state
+
+    try {
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        body: files,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (
+        (response?.status === 200 || response?.status === 201) &&
+        response.ok
+      ) {
+        const data = await response.json();
+        if (data?.length) {
+          return data.map((item: any) => item?.data);
+        }
+        return await data?.data;
+      } else {
+        console.log("image upload failed", response);
+        return;
+      }
+    } catch (error) {
+      console.log("image upload error", error);
+      return;
+    }
   };
 
   const handleChangeInput = (name: string, value: string) => {
@@ -111,6 +149,36 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
   useEffect(() => {
     setValue("subCategory", null);
   }, [selectedCategory, setValue]);
+
+  const [addProduct] = useAddProductMutation();
+
+  const onSubmit = async (data: any) => {
+    const files = new FormData();
+    fileList.forEach((file) => {
+      files.append("image", file.originFileObj as Blob);
+    });
+    const imgList = await uploadProductImage(files as FormData);
+    const product = {
+      title: data.title,
+      model: data.model,
+      price: Number(data.price),
+      code: data.code,
+      description: data.description,
+      cartoncapacity: Number(data.cartoncapacity),
+      category: data.category,
+      subCategory: data.subCategory,
+      brand: data.brand,
+      image: imgList,
+    };
+
+    try {
+      const response = await addProduct(product).unwrap();
+      console.log("response", response);
+      handleClose();
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
   return (
     <div>
