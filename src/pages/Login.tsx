@@ -4,11 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import Form from "../components/form/Form";
-import InputField from "../components/form/InputField";
+
 import { useLoginMutation } from "../redux/features/auth/authApi";
 import { TUser, setUser } from "../redux/features/auth/authSlice";
 import { useAppDispatch } from "../redux/hook";
 import { verifyToken } from "../utils/verifyToken";
+import FormInput from "../components/form/FormInput";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -42,9 +43,9 @@ const Login = () => {
 
   return (
     <Row justify="center" align="middle" style={{ height: "100vh" }}>
-      <Form onSubmit={onSubmit} defaultValues={defaultValues}>
-        <InputField type="email" name="email" label="Email:" />
-        <InputField type="text" name="password" label="Password" />
+      <Form submitHandler={onSubmit} defaultValues={defaultValues}>
+        <FormInput name="email" type="text" label="Email" required />
+        <FormInput name="password" type="password" label="Password" required />
         <Button htmlType="submit">Login</Button>
       </Form>
     </Row>

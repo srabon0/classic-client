@@ -1,14 +1,20 @@
-import React, { useEffect, useState } from "react";
-import CDrawer from "../../components/ui/Drawer";
-
 import { PlusOutlined } from "@ant-design/icons";
-import { Button, Image, Input, Select, Upload } from "antd";
-import { Controller, useForm } from "react-hook-form";
+import { Button, Col, Image, Upload } from "antd";
+import React, { useEffect, useState } from "react";
+import Form from "../../components/form/Form";
+import CDrawer from "../../components/ui/Drawer";
 import { useAppSelector } from "../../redux/hook";
 
 import type { GetProp, UploadFile, UploadProps } from "antd";
+import FormInput from "../../components/form/FormInput";
+import FormSelectField from "../../components/form/FormSelectField";
+import FormTextArea from "../../components/form/FormTextArea";
 import { useCurrentToken } from "../../redux/features/auth/authSlice";
-import { useAddProductMutation } from "../../redux/features/product/productApi";
+import {
+  useAddProductMutation,
+  useUpdateProductMutation,
+} from "../../redux/features/product/productApi";
+import { TSubCategory } from "../../types/categories.type";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 
@@ -36,24 +42,60 @@ const commonStyles = {
 };
 
 type Props = {
+  updatingData?: any;
   isOpen: boolean;
   handleClose: () => void;
 };
 
-const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
+const ProductForm: React.FC<Props> = ({
+  updatingData,
+  isOpen,
+  handleClose,
+}) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [selectedCategory, setSelectedCategory] = useState({
+    value: "",
+    label: "",
+  });
   const token = useAppSelector(useCurrentToken);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    clearErrors,
-    formState: { errors },
-    control,
-    watch,
-  } = useForm();
+  const [defaultValues, setDefaultValues] = useState<any>({
+    title: "",
+    model: "",
+    price: "",
+    code: "",
+    cartoncapacity: "",
+    description: "",
+    category: "",
+    subCategory: "",
+    brand: "",
+  });
+
+  useEffect(() => {
+    setFileList([]);
+    setPreviewImage("");
+    setSelectedCategory({ value: "", label: "" });
+    setSubCategory([]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (updatingData) {
+      setDefaultValues({
+        title: updatingData?.title,
+        model: updatingData?.model,
+        price: updatingData?.price,
+        code: updatingData?.code,
+        cartoncapacity: updatingData?.cartoncapacity,
+        description: updatingData?.description,
+        category: updatingData?.category?._id || selectedCategory.value,
+        subCategory: updatingData?.subCategory,
+        brand: updatingData?.brand?._id,
+      });
+    }
+  }, [updatingData]);
 
   const uploadProductImage = async (files: FormData) => {
     const base =
@@ -94,21 +136,47 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     }
   };
 
-  const handleChangeInput = (name: string, value: string) => {
-    setValue(name, value);
-    if (value.trim().length > 0) clearErrors(name);
-  };
+  const uploadProductImageToFolder = async (files: FormData) => {
+    const folder = updatingData?.image[0]?.folder || "tempFolder";
+    const base =
+      import.meta.env.NODE_ENV === "development"
+        ? import.meta.env.VITE_LOCAL_BACKEND_URL
+        : import.meta.env.VITE_PROD_BACKEND_URL;
+    const uploadUrl = base + "files/upload-to-folder/" + folder;
 
-  const handleChangeCategory = (value: string) => {
-    console.log(`selected ${value}`);
-  };
+    try {
+      const response = await fetch(uploadUrl, {
+        method: "POST",
+        body: files,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          authorization: `Bearer ${token}`,
+        },
+      });
 
-  const handleChangeBrand = (value: string) => {
-    console.log(`selected ${value}`);
+      if (
+        (response?.status === 200 || response?.status === 201) &&
+        response.ok
+      ) {
+        const data = await response.json();
+        if (data?.length) {
+          return data.map((item: any) => item?.data);
+        }
+        return await data?.data;
+      } else {
+        console.log("image upload failed", response);
+        return;
+      }
+    } catch (error) {
+      console.log("image upload error", error);
+      return;
+    }
   };
 
   const categoryList = useAppSelector((state) => state.categories.categories);
   const brandList = useAppSelector((state) => state.brand.brands);
+
+  const [subCategory, setSubCategory] = useState<TSubCategory[]>([]);
 
   const options = {
     category: categoryList?.map((item) => ({
@@ -144,244 +212,200 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
     </button>
   );
 
-  const selectedCategory = watch("category");
-
-  useEffect(() => {
-    setValue("subCategory", null);
-  }, [selectedCategory, setValue]);
-
   const [addProduct] = useAddProductMutation();
+  const [updateProduct] = useUpdateProductMutation();
 
   const onSubmit = async (data: any) => {
+    setIsSubmitting(true);
     const files = new FormData();
     fileList.forEach((file) => {
       files.append("image", file.originFileObj as Blob);
     });
-    const imgList = await uploadProductImage(files as FormData);
-    const product = {
+    // const imgList = await uploadProductImage(files as FormData);
+    const imgList = updatingData?.image?.length
+      ? await uploadProductImageToFolder(files as FormData)
+      : await uploadProductImage(files as FormData);
+    const payload = {
       title: data.title,
       model: data.model,
       price: Number(data.price),
       code: data.code,
       description: data.description,
       cartoncapacity: Number(data.cartoncapacity),
-      category: data.category,
+      category: data.category as string,
       subCategory: data.subCategory,
       brand: data.brand,
       image: imgList,
     };
 
+    const isUpdate = updatingData ? updatingData._id : null;
     try {
-      const response = await addProduct(product).unwrap();
+      const response = (await isUpdate)
+        ? updateProduct({
+            ...payload,
+            id: updatingData._id,
+          }).unwrap()
+        : addProduct(payload).unwrap();
       console.log("response", response);
+      setIsSubmitting(false);
       handleClose();
     } catch (error) {
       console.log("error", error);
+      setIsSubmitting(false);
+      handleClose();
     }
   };
 
+  const onChangeCategory = (cat: any) => {
+    setSelectedCategory(cat);
+
+    const foundCategory = options?.category?.find(
+      (item) => item?.value === cat
+    );
+    const subCategories = foundCategory?.subCategories as
+      | TSubCategory[]
+      | undefined;
+    setSubCategory(subCategories || []);
+  };
   return (
     <div>
-      <CDrawer title="Add Product" isOpen={isOpen} onClose={handleClose}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div
+      <CDrawer title={"Product Form"} isOpen={isOpen} onClose={handleClose}>
+        <Form defaultValues={defaultValues} submitHandler={onSubmit}>
+          <Col
+            className="gutter-row"
             style={{
               marginBottom: "10px",
             }}
           >
-            <Input
+            <FormInput
+              required
+              label="Product name"
+              name="title"
+              type="text"
               size="large"
               placeholder="Product name"
-              {...register("title", {
-                required: "Product name is required",
-              })}
-              onChange={(e) => handleChangeInput("title", e.target.value)}
+              validation={{ required: "Product name is required" }}
             />
-            {errors.title && (
-              <p style={{ color: "red" }}>{errors.title.message as string}</p>
-            )}
-          </div>
-          <div
+          </Col>
+
+          <Col
+            className="gutter-row"
             style={{
               marginBottom: "10px",
             }}
           >
-            <Input
+            <FormInput
+              required
+              label="Model"
+              name="model"
+              type="text"
               size="large"
               placeholder="Model"
-              {...register("model", { required: "Model is required" })}
-              onChange={(e) => handleChangeInput("model", e.target.value)}
+              validation={{ required: "Model is required" }}
             />
-            {errors.model && (
-              <p style={{ color: "red" }}>{errors.model.message as string}</p>
-            )}
-          </div>
-          <div
+          </Col>
+
+          <Col
+            className="gutter-row"
             style={{
               marginBottom: "10px",
             }}
           >
-            <Input
-              size="large"
+            <FormInput
+              label="Price"
+              required
+              name="price"
               type="number"
-              min={0}
+              size="large"
               placeholder="Price"
-              {...register("price", { required: "Price is required" })}
-              onChange={(e) => handleChangeInput("price", e.target.value)}
+              validation={{ required: "Price is required" }}
             />
-            {errors.price && (
-              <p style={{ color: "red" }}>{errors.price.message as string}</p>
-            )}
-          </div>
-          <div
+          </Col>
+
+          <Col
+            className="gutter-row"
             style={{
               marginBottom: "10px",
             }}
           >
-            <Input
+            <FormInput
+              required
+              label="Code"
+              name="code"
+              type="text"
               size="large"
               placeholder="Code"
-              {...register("code", { required: "Code is required" })}
-              onChange={(e) => handleChangeInput("code", e.target.value)}
+              validation={{ required: "Code is required" }}
             />
-            {errors.code && (
-              <p style={{ color: "red" }}>{errors.code.message as string}</p>
-            )}
-          </div>
-          <div
+          </Col>
+
+          <Col
+            className="gutter-row"
             style={{
               marginBottom: "10px",
             }}
           >
-            <Input
-              size="large"
-              placeholder="Description"
-              {...register("description", {
-                required: "Description is required",
-              })}
-              onChange={(e) => handleChangeInput("description", e.target.value)}
-            />
-            {errors.description && (
-              <p style={{ color: "red" }}>
-                {errors.description.message as string}
-              </p>
-            )}
-          </div>
-          <div
-            style={{
-              marginBottom: "10px",
-            }}
-          >
-            <Input
-              size="large"
+            <FormInput
+              name="cartoncapacity"
+              label="Carton capacity"
+              required
               type="number"
-              min={0}
+              size="large"
               placeholder="Carton capacity"
-              {...register("cartoncapacity", {
-                required: "Carton capacity is required",
-              })}
-              onChange={(e) =>
-                handleChangeInput("cartoncapacity", e.target.value)
-              }
+              validation={{ required: "Carton capacity is required" }}
             />
-            {errors.cartoncapacity && (
-              <p style={{ color: "red" }}>
-                {errors.cartoncapacity.message as string}
-              </p>
-            )}
-          </div>
-          <div
+          </Col>
+
+          <Col
+            className="gutter-row"
             style={{
               marginBottom: "10px",
             }}
           >
-            <Controller
+            <FormSelectField
               name="category"
-              control={control}
-              rules={{ required: "Category is required" }}
-              render={({ field }) => (
-                <Select
-                  allowClear
-                  size="large"
-                  {...field}
-                  placeholder="Select Category"
-                  style={commonStyles.select}
-                  options={options.category}
-                  loading={false} // Change this to actual loading state
-                  onChange={(value) => {
-                    field.onChange(value);
-                    handleChangeCategory(value);
-                  }}
-                />
-              )}
+              options={options.category}
+              placeholder="Select Category"
+              label="Category"
+              handleChange={(value) => {
+                onChangeCategory(value);
+              }}
             />
-            {errors.category && (
-              <p style={{ color: "red", marginBottom: "10px" }}>
-                {errors.category.message as string}
-              </p>
-            )}
-          </div>
+          </Col>
 
-          {selectedCategory && (
-            <div style={{ marginBottom: "10px" }}>
-              <Controller
-                name="subCategory"
-                control={control}
-                rules={{ required: "Sub Category is required" }}
-                render={({ field }) => (
-                  <Select
-                    size="large"
-                    {...field}
-                    placeholder="Select Sub Category"
-                    style={commonStyles.select}
-                    options={
-                      options.category.find(
-                        (item) => item.value === selectedCategory
-                      )?.subCategories
-                    }
-                    onChange={(value) => field.onChange(value)}
-                  />
-                )}
-              />
-              {errors.subCategory && (
-                <p style={{ color: "red", marginBottom: "10px" }}>
-                  {errors.subCategory.message as string}
-                </p>
-              )}
-            </div>
-          )}
-
-          <div
+          <Col
+            className="gutter-row"
             style={{
               marginBottom: "10px",
             }}
           >
-            <Controller
-              name="brand"
-              control={control}
-              rules={{ required: "Brand is required" }}
-              render={({ field }) => (
-                <Select
-                  size="large"
-                  {...field}
-                  placeholder="Select Brand"
-                  style={commonStyles.select}
-                  options={options.brand}
-                  loading={false} // Change this to actual loading state
-                  onChange={(value) => {
-                    field.onChange(value);
-                    handleChangeBrand(value);
-                  }}
-                />
-              )}
+            <FormSelectField
+              name="subCategory"
+              options={subCategory as any}
+              placeholder="Select Sub Category"
+              label="Sub Category"
             />
-            {errors.brand && (
-              <p style={{ color: "red", marginBottom: "10px" }}>
-                {errors.brand.message as string}
-              </p>
-            )}
-          </div>
-          <>
+          </Col>
+
+          <Col
+            className="gutter-row"
+            style={{
+              marginBottom: "10px",
+            }}
+          >
+            <FormSelectField
+              name="brand"
+              options={options.brand}
+              placeholder="Select Brand"
+              label="Brand"
+            />
+          </Col>
+          <Col
+            style={{
+              marginBottom: "10px",
+              marginTop: "10px",
+            }}
+          >
             <Upload
               listType="picture-card"
               fileList={fileList}
@@ -401,15 +425,40 @@ const Form: React.FC<Props> = ({ isOpen, handleClose }) => {
                 src={previewImage}
               />
             )}
-          </>
+          </Col>
 
-          <Button htmlType="submit" style={commonStyles.button}>
-            Submit
+          <Col
+            className="gutter-row"
+            style={{
+              marginBottom: "10px",
+            }}
+          >
+            <FormTextArea
+              name="description"
+              label="Description"
+              placeholder="Description"
+              rows={4}
+            />
+          </Col>
+          <Button
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            htmlType="submit"
+            style={commonStyles.button}
+          >
+            {
+              // eslint-disable-next-line no-nested-ternary
+              isSubmitting
+                ? "Submitting..."
+                : updatingData
+                ? "Update Product"
+                : "Create Product"
+            }
           </Button>
-        </form>
+        </Form>
       </CDrawer>
     </div>
   );
 };
 
-export default Form;
+export default ProductForm;

@@ -17,7 +17,7 @@ const productApi = baseApi.injectEndpoints({
     }),
     addProduct: builder.mutation({
       query: (data) => ({
-        url: "products/create-product",
+        url: PRODUCT_URL + "/create-product",
         method: "POST",
         body: data,
       }),
@@ -32,8 +32,8 @@ const productApi = baseApi.injectEndpoints({
     }),
     updateProduct: builder.mutation({
       query: (data) => ({
-        url: `products/${data.id}`,
-        method: "PUT",
+        url: `products/${data?.id}`,
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: [tagTypes.products],

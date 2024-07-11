@@ -1,16 +1,23 @@
 import { Button, Input } from "antd";
 import { useState } from "react";
 
+import ClasssicImage from "../../components/ui/ClassicImage";
 import ClassicTable from "../../components/ui/Table";
 import { useGetProductsQuery } from "../../redux/features/product/productApi";
-import Form from "./Form";
 import { TProduct } from "../../types/product.type";
+import { getImageUrl } from "../../utils/get-image-url";
+import Form from "./Form";
 const columns = [
   {
     title: "Sl No.",
     dataIndex: "id",
     key: "id",
     render: (text: any) => <>{text}</>, // Assuming direct rendering, similar to the second definition
+  },
+  {
+    title: "Image",
+    dataIndex: "image",
+    key: "image",
   },
   {
     title: "Name",
@@ -49,6 +56,7 @@ const columns = [
 ];
 
 const Product = () => {
+  const [updatingData, setUpdatingData] = useState<any>([]);
   const [visible, setVisible] = useState<boolean>(false);
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
@@ -78,7 +86,14 @@ const Product = () => {
   };
   const onClose = () => {
     setVisible(false);
+    setUpdatingData([]);
   };
+  const onEdit = (data: any) => {
+    console.log("Edit", data);
+    setUpdatingData(data);
+    setVisible(true);
+  };
+
   const { data, error, isLoading } = useGetProductsQuery({
     ...query,
   });
@@ -92,7 +107,9 @@ const Product = () => {
     id: Number((meta?.page - 1) * meta?.limit + index + 1)
       .toString()
       .padStart(2, "0"),
+    image: <ClasssicImage src={getImageUrl(item?.image[0]?.imageUrl)} />,
     title: item.title,
+
     brand: item.brand.name,
     category: item.category.name,
     price: item.price,
@@ -100,8 +117,21 @@ const Product = () => {
 
     action: (
       <div style={{ display: "flex", gap: "10px" }}>
-        <Button type="primary">Edit</Button>
-        <Button type="primary" danger>
+        <Button
+          onClick={() => {
+            onEdit(item);
+          }}
+          type="primary"
+        >
+          Edit
+        </Button>
+        <Button
+          onClick={() => {
+            console.log("Delete", item);
+          }}
+          type="primary"
+          danger
+        >
           Delete
         </Button>
       </div>
@@ -131,23 +161,12 @@ const Product = () => {
           // onTableChange={onTableChange}
           showPagination={true}
         />
-
-        {/* <ProductTable products={ServerData.data} meta={ServerData.meta} />
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={ServerData?.meta?.totalCounts}
-          onChange={handlePageChange}
-          showSizeChanger
-          pageSizeOptions={["10", "20", "50", "100"]}
-          style={{
-            marginTop: "20px",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        /> */}
       </>
-      <Form isOpen={visible} handleClose={onClose} />
+      <Form
+        updatingData={updatingData}
+        isOpen={visible}
+        handleClose={onClose}
+      />
     </div>
   );
 };
