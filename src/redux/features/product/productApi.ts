@@ -38,6 +38,15 @@ const productApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.products],
     }),
+
+    deleteSingleImage: builder.mutation({
+      query: (data) => ({
+        url: `products/delete-image/${data?.productId}`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: [tagTypes.products],
+    }),
   }),
 });
 
@@ -46,4 +55,5 @@ export const {
   useAddProductMutation,
   useDeleteProductMutation,
   useUpdateProductMutation,
+  useDeleteSingleImageMutation,
 } = productApi;

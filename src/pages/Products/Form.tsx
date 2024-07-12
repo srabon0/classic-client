@@ -9,6 +9,7 @@ import type { GetProp, UploadFile, UploadProps } from "antd";
 import FormInput from "../../components/form/FormInput";
 import FormSelectField from "../../components/form/FormSelectField";
 import FormTextArea from "../../components/form/FormTextArea";
+import DeleteImageCard from "../../components/ui/ClassicDeleteImage";
 import { useCurrentToken } from "../../redux/features/auth/authSlice";
 import {
   useAddProductMutation,
@@ -425,6 +426,23 @@ const ProductForm: React.FC<Props> = ({
                 src={previewImage}
               />
             )}
+
+            {updatingData?.image?.length
+              ? updatingData?.image?.map((item: any, index: number) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <DeleteImageCard
+                      item={{ ...item, productId: updatingData?._id }}
+                    />
+                  </div>
+                ))
+              : null}
           </Col>
 
           <Col
