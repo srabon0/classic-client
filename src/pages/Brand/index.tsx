@@ -1,8 +1,14 @@
 import { Button, Col, Input, Row } from "antd";
 import { useState } from "react";
+import { toast } from "sonner";
+import ClassicModal from "../../components/ui/ClassicModal";
+import ContentPreloader from "../../components/ui/ContentPreloader";
 import ClassicTable from "../../components/ui/Table";
 import { useDebounce } from "../../hooks/DebounceHook";
-import { useGetBrandsQuery } from "../../redux/features/brand/brandApi";
+import {
+  useDeleteBrandMutation,
+  useGetBrandsQuery,
+} from "../../redux/features/brand/brandApi";
 import { TCategory } from "../../types/categories.type";
 import Form from "./Form";
 
@@ -29,7 +35,12 @@ const columns = [
   },
 ];
 
-const Category = () => {
+const Brand = () => {
+  const [deleteBrand, { isLoading: isDeleting, error: deleteError }] =
+    useDeleteBrandMutation();
+  const [editingData, setEditingData] = useState<any>(null);
+  const [deletingData, setDeletingData] = useState<any>(null);
+
   const [searchTerm, setSearchTerm] = useState<string>("");
   const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
   const [visible, setVisible] = useState<boolean>(false);
@@ -64,11 +75,41 @@ const Category = () => {
   const onClose = () => {
     setVisible(false);
   };
+
+  const onEdit = (data: any) => {
+    setEditingData(data);
+    showDrawer();
+  };
+
+  const onDelete = (data: any) => {
+    setDeletingData(data);
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      await deleteBrand(deletingData._id).unwrap();
+      setDeletingData(null);
+    } catch (error) {
+      console.log("error", error);
+      toast.error("Error deleting category");
+    }
+  };
+
   const { data, error, isLoading } = useGetBrandsQuery({
     ...query,
   });
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error</div>;
+  if (isLoading || isDeleting)
+    return (
+      <ContentPreloader
+        loadingText={isLoading ? "Loading Brands..." : "Deleting Brand..."}
+      />
+    );
+  if (error) {
+    toast.error("Could not fetch the Brand. Please try again.!!!");
+  }
+  if (deleteError) {
+    toast.error("Could not delete the Brand. Please try again.!!!");
+  }
 
   const brands = data?.data?.data;
   const meta = data?.data?.meta;
@@ -107,8 +148,10 @@ const Category = () => {
                 gap: "10px",
               }}
             >
-              <Button type="primary">Edit</Button>
-              <Button type="primary" danger>
+              <Button onClick={() => onEdit(item)} type="primary">
+                Edit
+              </Button>
+              <Button onClick={() => onDelete(item)} type="primary" danger>
                 Delete
               </Button>
             </div>
@@ -122,9 +165,28 @@ const Category = () => {
         showPagination={true}
       />
 
-      <Form isOpen={visible} handleClose={onClose} />
+      <Form updatingData={editingData} isOpen={visible} handleClose={onClose} />
+
+      <ClassicModal
+        title="Delete Confirmation"
+        isOpen={!!deletingData}
+        onClose={() => setDeletingData(null)}
+        onConfirm={() => {
+          onConfirmDelete();
+        }}
+        isLoading={false}
+        isDeleteModal={true}
+      >
+        <p>Are you sure you want to delete?</p>
+        <p>
+          <strong>
+            Brand : {deletingData?.name}
+            <br />
+          </strong>
+        </p>
+      </ClassicModal>
     </div>
   );
 };
 
-export default Category;
+export default Brand;

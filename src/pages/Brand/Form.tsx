@@ -31,11 +31,7 @@ type Props = {
   handleClose: () => void;
 };
 
-const ProductForm: React.FC<Props> = ({
-  updatingData,
-  isOpen,
-  handleClose,
-}) => {
+const BrandForm: React.FC<Props> = ({ updatingData, isOpen, handleClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [addBrand] = useAddBrandMutation();
@@ -137,4 +133,4 @@ const ProductForm: React.FC<Props> = ({
   );
 };
 
-export default ProductForm;
+export default BrandForm;
