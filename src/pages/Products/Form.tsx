@@ -450,9 +450,9 @@ const ProductForm: React.FC<Props> = ({
               // eslint-disable-next-line no-nested-ternary
               isSubmitting
                 ? "Submitting..."
-                : updatingData
-                ? "Update Product"
-                : "Create Product"
+                : !updatingData
+                ? "Create Product"
+                : "Update Product"
             }
           </Button>
         </Form>

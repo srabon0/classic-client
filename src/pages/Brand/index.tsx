@@ -1,6 +1,7 @@
-import { Button } from "antd";
+import { Button, Col, Input, Row } from "antd";
 import { useState } from "react";
 import ClassicTable from "../../components/ui/Table";
+import { useDebounce } from "../../hooks/DebounceHook";
 import { useGetBrandsQuery } from "../../redux/features/brand/brandApi";
 import { TCategory } from "../../types/categories.type";
 import Form from "./Form";
@@ -29,15 +30,19 @@ const columns = [
 ];
 
 const Category = () => {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const debouncedSearchTerm = useDebounce<string>(searchTerm, 500);
   const [visible, setVisible] = useState<boolean>(false);
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(20);
+
   // const [sortBy, setSortBy] = useState<string>("");
   // const [sortOrder, setSortOrder] = useState<string>("");
 
   query["limit"] = size;
   query["page"] = page;
+  query["searchTerm"] = debouncedSearchTerm;
   // query["sortBy"] = sortBy;
   // query["sortOrder"] = sortOrder;
 
@@ -70,9 +75,21 @@ const Category = () => {
 
   return (
     <div>
-      <Button type="primary" onClick={showDrawer}>
-        Add Category
-      </Button>
+      <Row gutter={[16, 16]}>
+        <Col span={21}>
+          <Input
+            allowClear
+            placeholder="Search"
+            style={{ width: "100%", marginBottom: "20px" }}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Col>
+        <Col span={3}>
+          <Button type="primary" onClick={showDrawer} style={{ width: "100%" }}>
+            Add Brand
+          </Button>
+        </Col>
+      </Row>
 
       <ClassicTable
         loading={isLoading}
