@@ -8,6 +8,11 @@ import { Layout, Menu } from "antd";
 const { Sider } = Layout;
 const items = [
   {
+    key: "4",
+    icon: createElement(UserOutlined),
+    label: <Link to="/dashboard">Dashboard</Link>,
+  },
+  {
     key: "1",
     icon: createElement(UserOutlined),
     label: <Link to="/product">Product</Link>,
