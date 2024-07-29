@@ -1,6 +1,5 @@
 import { Card, Col, Row, Skeleton, Statistic } from "antd";
 import React, { useEffect, useState } from "react";
-import LineChart from "../components/charts/LineChart";
 
 const DashboardCard: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -69,10 +68,6 @@ const DashboardCard: React.FC = () => {
             </Skeleton>
           </Card>
         </Col>
-      </Row>
-
-      <Row gutter={16} style={{ marginTop: 16 }}>
-        <LineChart />
       </Row>
     </>
   );
