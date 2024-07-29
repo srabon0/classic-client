@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { Button, Col, Input, Row } from "antd";
+import { Button, Col, Input, Row, Select } from "antd";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import ClasssicImage from "../../components/ui/ClassicImage";
@@ -11,6 +12,7 @@ import {
   useDeleteProductMutation,
   useGetProductsQuery,
 } from "../../redux/features/product/productApi";
+import { useAppSelector } from "../../redux/hook";
 import { TProduct } from "../../types/product.type";
 import { getImageUrl } from "../../utils/get-image-url";
 import Form from "./Form";
@@ -68,18 +70,39 @@ const Product = () => {
   const [updatingData, setUpdatingData] = useState<any>(null);
   const [deletingData, setDeletingData] = useState<any>(null);
   const [visible, setVisible] = useState<boolean>(false);
-  const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(20);
+  const [selectedCat, setSelectedCat] = useState<string | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [query, setQuery] = useState<Record<string, any>>({});
 
-  // const [sortBy, setSortBy] = useState<string>("");
-  // const [sortOrder, setSortOrder] = useState<string>("");
+  const categoryList = useAppSelector((state) => state.categories.categories);
+  const brandList = useAppSelector((state) => state.brand.brands);
 
-  query["limit"] = size;
-  query["page"] = page;
-  query["searchTerm"] = debouncedSearchTerm;
-  // query["sortBy"] = sortBy;
-  // query["sortOrder"] = sortOrder;
+  const options = {
+    category: categoryList?.map((item) => ({
+      value: item._id,
+      label: item.name,
+      subCategories: item?.subCategories?.map((sub) => ({
+        value: sub.name,
+        label: sub.name,
+      })),
+    })),
+    brand: brandList?.map((item) => ({
+      value: item._id,
+      label: item.name,
+    })),
+  };
+
+  useEffect(() => {
+    setQuery({
+      limit: size,
+      page: page,
+      searchTerm: debouncedSearchTerm,
+      category: selectedCat,
+      brand: selectedBrand,
+    });
+  }, [size, page, debouncedSearchTerm, selectedCat, selectedBrand]);
 
   useEffect(() => {
     if (debouncedSearchTerm) {
@@ -122,7 +145,7 @@ const Product = () => {
   };
 
   const { data, error, isLoading } = useGetProductsQuery({
-    ...query,
+    ...Object.fromEntries(Object.entries(query).filter(([_, v]) => v != null)),
   });
 
   const [deleteProduct, { isLoading: isDeleting, error: deleteError }] =
@@ -182,12 +205,59 @@ const Product = () => {
   return (
     <div>
       <Row gutter={[16, 16]}>
-        <Col span={21}>
+        <Col span={10}>
           <Input
             allowClear
             placeholder="Search"
             style={{ width: "100%", marginBottom: "20px" }}
             onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Col>
+        <Col
+          style={{
+            marginBottom: "10px",
+          }}
+        >
+          <Select
+            allowClear
+            showSearch
+            style={{ width: 300 }}
+            placeholder="Select Category"
+            optionFilterProp="label"
+            filterSort={(optionA, optionB) =>
+              (optionA?.label ?? "")
+                .toLowerCase()
+                .localeCompare((optionB?.label ?? "").toLowerCase())
+            }
+            options={options.category}
+            onChange={(value) => {
+              setSelectedCat(value as string);
+              console.log("Selected Category:", value); // Debugging line
+            }}
+          />
+        </Col>
+
+        <Col
+          style={{
+            marginBottom: "10px",
+          }}
+        >
+          <Select
+            allowClear
+            showSearch
+            style={{ width: 300 }}
+            placeholder="Select Brand"
+            optionFilterProp="label"
+            filterSort={(optionA, optionB) =>
+              (optionA?.label ?? "")
+                .toLowerCase()
+                .localeCompare((optionB?.label ?? "").toLowerCase())
+            }
+            options={options.brand}
+            onChange={(value) => {
+              setSelectedBrand(value as string);
+              console.log("Selected Brand:", value); // Debugging line
+            }}
           />
         </Col>
         <Col span={3}>
