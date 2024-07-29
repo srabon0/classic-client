@@ -16,8 +16,8 @@ const Login = () => {
   const dispatch = useAppDispatch();
 
   const defaultValues = {
-    email: "srabonemam4@gmail.com",
-    password: "password123",
+    email: "",
+    password: "",
   };
 
   const [login] = useLoginMutation();
